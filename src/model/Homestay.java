@@ -4,15 +4,15 @@ public class Homestay {
 
     private String homeID;
     private String homeName;
-    private String roomNumber;
+    private int roomNumber;
     private String address;
-    private String maximumcapacity;
+    private int maximumcapacity;
 
     //constructor
     public Homestay() {
     }
 
-    public Homestay(String homeID, String homeName, String roomNumber, String address, String maximumcapacity) {
+    public Homestay(String homeID, String homeName, int roomNumber, String address, int maximumcapacity) {
         this.homeID = homeID;
         this.homeName = homeName;
         this.roomNumber = roomNumber;
@@ -37,11 +37,11 @@ public class Homestay {
         this.homeName = homeName;
     }
 
-    public String getRoomNumber() {
+    public int getRoomNumber() {
         return roomNumber;
     }
 
-    public void setRoomNumber(String roomNumber) {
+    public void setRoomNumber(int roomNumber) {
         this.roomNumber = roomNumber;
     }
 
@@ -53,11 +53,11 @@ public class Homestay {
         this.address = address;
     }
 
-    public String getMaximumcapacity() {
+    public int getMaximumcapacity() {
         return maximumcapacity;
     }
 
-    public void setMaximumcapacity(String maximumcapacity) {
+    public void setMaximumcapacity(int maximumcapacity) {
         this.maximumcapacity = maximumcapacity;
     }
 
