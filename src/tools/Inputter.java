@@ -16,6 +16,26 @@ public class Inputter {
         return ndl.nextLine();
     }
     
+    //Nhập dữ liệu kiểu số nguyên
+    public int getInt(String message){
+        int kq = 0;
+        String temp = getString(message);
+        if(Acceptable.isValid(temp, Acceptable.INTEGER_VALID)){
+            kq = Integer.parseInt(temp);
+        }
+        return kq;
+    }
+    
+    //Nhập dữ liệu kiểu số thực
+    public double getDouble(String message){
+        double kq = 0;
+        String temp = getString(message);
+        if(Acceptable.isValid(temp, Acceptable.DOUBLE_VALID)){
+            kq = Double.parseDouble(temp);
+        }
+        return kq;
+    }
+    
     //check data
     public String inputAndLoop(String message, String pattern, boolean isLoop){
         String result;
