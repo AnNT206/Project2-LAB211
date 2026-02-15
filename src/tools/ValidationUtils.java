@@ -9,6 +9,8 @@ public interface ValidationUtils {
     public final String POSITIVE_INT_VALID = "^[1-9]\\d*$";
     public final String DOUBLE_VALID = "^-?\\d+(\\.\\d+)?$";
     public final String POSITIVE_DOUBLE_VALID = "^\\d+(\\.\\d+)?$";
+    public final String TourName_VALID = "^[a-zA-Z0-9]{1,25}$";
+    public final String TIME_VALID = "^\\d+ days \\d+ nights$";
     
     public static boolean isValid(String data, String pattern){
         return data.matches(pattern);

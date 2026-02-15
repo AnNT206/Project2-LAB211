@@ -1,5 +1,8 @@
 package model;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Tour {
@@ -12,11 +15,12 @@ public class Tour {
     private Date departureDate;
     private Date endDate;
     private int tourist;
+    private boolean booking;
 
     public Tour() {
     }
 
-    public Tour(String tourId, String tourName, String time, double price, String homeId, Date departureDate, Date endDate, int tourist) {
+    public Tour(String tourId, String tourName, String time, double price, String homeId, Date departureDate, Date endDate, int tourist, boolean booking) {
         this.tourId = tourId;
         this.tourName = tourName;
         this.time = time;
@@ -25,6 +29,7 @@ public class Tour {
         this.departureDate = departureDate;
         this.endDate = endDate;
         this.tourist = tourist;
+        this.booking = booking;
     }
 
     //getter and setter
@@ -92,4 +97,24 @@ public class Tour {
         this.tourist = tourist;
     }
 
+    public boolean isBooking() {
+        return booking;
+    }
+
+    public void setBooking(boolean booking) {
+        this.booking = booking;
+    }
+    
+    //calculate time
+    public String Time(){
+        long diff = endDate.getTime() - departureDate.getTime();
+        long days = diff / (1000 * 60 * 60 * 24) + 1;
+        return String.format("%d days %d night", days, days - 1);
+    }
+
+    @Override
+    public String toString(){
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return String.format("%s,%s,%s,%.2f,%s,%s,%s,%d,%s", tourId, tourName, Time(), price, homeId, sdf.format(departureDate), sdf.format(endDate), tourist, booking ? TRUE : FALSE);
+    }
 }
