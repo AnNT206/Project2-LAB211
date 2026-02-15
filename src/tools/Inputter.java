@@ -20,7 +20,7 @@ public class Inputter {
     public int getInt(String message){
         int kq = 0;
         String temp = getString(message);
-        if(Acceptable.isValid(temp, Acceptable.INTEGER_VALID)){
+        if(ValidationUtils.isValid(temp, ValidationUtils.INTEGER_VALID)){
             kq = Integer.parseInt(temp);
         }
         return kq;
@@ -30,7 +30,7 @@ public class Inputter {
     public double getDouble(String message){
         double kq = 0;
         String temp = getString(message);
-        if(Acceptable.isValid(temp, Acceptable.DOUBLE_VALID)){
+        if(ValidationUtils.isValid(temp, ValidationUtils.DOUBLE_VALID)){
             kq = Double.parseDouble(temp);
         }
         return kq;
@@ -48,7 +48,7 @@ public class Inputter {
                 return result;
             }
             
-            isInvalid = !Acceptable.isValid(result, pattern);
+            isInvalid = !ValidationUtils.isValid(result, pattern);
             
             if(isInvalid && isLoop){
                 System.out.println("Data is invalid! Re-enter...");

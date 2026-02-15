@@ -63,6 +63,6 @@ public class Homestay {
 
     @Override
     public String toString(){
-        return String.format("|%6s|%-25s|%-2s|%-3s||",this.homeID, this.homeName, this.roomNumber, this.address, this.maximumcapacity);
+        return String.format("|%6s|%-25s|%-2d|%-3s|%-2d|",this.homeID, this.homeName, this.roomNumber, this.address, this.maximumcapacity);
     }
 }
