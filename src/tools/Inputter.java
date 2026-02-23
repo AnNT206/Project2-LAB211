@@ -15,7 +15,7 @@ public class Inputter {
     
     //Nhập dữ liệu kiểu chuỗi
     public String getString(String message){
-        System.out.println(message);
+        System.out.print(message);
         return ndl.nextLine();
     }
     
@@ -77,7 +77,6 @@ public class Inputter {
     public Tour updateTour(){
         Tour t = new Tour();
         t.setTourName(inputAndLoop("Enter tour name: ", ValidationUtils.TourName_VALID, true));
-        t.setTime(inputAndLoop("Enter time: ", ValidationUtils.TIME_VALID, true));
         t.setPrice(getDouble("Enter price: "));
         t.setHomeId(inputAndLoop("Enter home ID: ", ValidationUtils.HomeID_VALID, true));
         t.setDepartureDate(getDate("Enter departure date (dd/MM/yyyy): "));

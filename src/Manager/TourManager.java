@@ -1,26 +1,25 @@
 package Manager;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import model.Homestay;
 import model.Tour;
-import tools.Inputter;
-import tools.ValidationUtils;
+import tools.FileUtils;
 
 public class TourManager {
 
     private List<Tour> tourList;
     private String pathFile;
     private boolean saved;
-    private Inputter inputter;
-    private ValidationUtils validator;
 
     //constructor
-    public TourManager(Inputter inputter, ValidationUtils validator) {
-        this.inputter = inputter;
-        this.validator = validator;
+    public TourManager() {
         tourList = new ArrayList<>();
         this.saved = true;
         this.pathFile = "./Tours.txt";
+        readFromFile();
     }
 
     public Tour findById(String TourId) {
@@ -35,13 +34,14 @@ public class TourManager {
     //addNew
     public boolean addNew(HomestayManager hm, Tour t) {
         //check isDuplicate
-        if ((findById(t.getTourId()) != null)) {
+        if (findById(t.getTourId()) != null) {
             return false;
         }
 
         //check homestay exist or not
-        if (hm.findById(t.getHomeId()) == null) {
-            System.out.println("HOme ID does not exist");
+        Homestay home = hm.findById(t.getHomeId());
+        if (home == null) {
+            System.out.println("Home ID does not exist");
             return false;
         }
 
@@ -55,6 +55,11 @@ public class TourManager {
         if (t.getTourist() <= 0) {
             System.out.println("Number of tourist must be greater than 0");
             return false;
+        }
+
+        //check capacity
+        if (t.getTourist() > home.getMaximumcapacity()) {
+            System.out.println("Number of tourist exceeds maximum capacity of homestay");
         }
 
         //booking = false
@@ -102,12 +107,68 @@ public class TourManager {
         System.out.println("Update tour successfully");
         return true;
     }
-    
+
     //List tour
-    public void listTour(){
+    public void listTour() {
         System.out.println("-------TOUR LIST-------");
         for (Tour t : tourList) {
             System.out.println(t);
         }
     }
+
+    public final void readFromFile() {
+        tourList.clear();
+        List<String> lines = FileUtils.readLines(pathFile);
+        System.out.println("Lines read: " + lines.size());
+
+        for (String line : lines) {
+            Tour t = textToObject(line);
+            if (t != null) {
+                tourList.add(t);
+                System.out.println("Loaded tour: " + t.getTourId() + " - " + t.getTourName());
+            } else {
+                System.out.println("Failed to parse line: " + line);
+            }
+        }
+        System.out.println("Total tours loaded: " + tourList.size());
+    }
+
+    public Tour textToObject(String temp) {
+        try {
+            String[] part = temp.split(",", 9);
+
+            if (part.length != 9) {
+                System.out.println("Error: Expected 9 parts, got " + part.length + " for line: " + temp);
+                return null;
+            }
+
+            for (int i = 0; i < part.length; i++) {
+                part[i] = part[i].trim();
+            }
+
+            Tour t = new Tour();
+
+            t.setTourId(part[0]);
+            t.setTourName(part[1]);
+            t.setTime(part[2]);
+            t.setPrice(Double.parseDouble(part[3]));
+            t.setHomeId(part[4]);
+
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            sdf.setLenient(false);
+
+            t.setDepartureDate(sdf.parse(part[5]));
+            t.setEndDate(sdf.parse(part[6]));
+
+            t.setTourist(Integer.parseInt(part[7]));
+            t.setBooking(Boolean.parseBoolean(part[8]));
+
+            return t;
+
+        } catch (Exception e) {
+            System.out.println("Error parsing tour line: " + e.getMessage());
+            return null;
+        }
+    }
+
 }

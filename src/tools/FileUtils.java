@@ -1,12 +1,14 @@
 package tools;
 
-import com.sun.xml.internal.messaging.saaj.util.CharWriter;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -26,7 +28,9 @@ public final class FileUtils {
             return lines;
         }
 
-        try ( BufferedReader br = new BufferedReader(new FileReader(f))) {
+        try (FileInputStream fis = new FileInputStream(f);
+             InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_16);
+             BufferedReader br = new BufferedReader(isr)) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (!line.trim().isEmpty()) {
@@ -41,7 +45,9 @@ public final class FileUtils {
     }
 
     public static void writeLines(String path, List<String> lines) {
-        try ( BufferedWriter bw = new BufferedWriter(new FileWriter(path))) {
+        try (FileOutputStream fos = new FileOutputStream(path);
+             OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_16LE);
+             BufferedWriter bw = new BufferedWriter(osw)) {
             for (String line : lines) {
                 bw.write(line);
                 bw.newLine();
