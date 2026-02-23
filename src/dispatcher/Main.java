@@ -1,7 +1,9 @@
 package dispatcher;
 
+import Manager.BookingManager;
 import Manager.HomestayManager;
 import Manager.TourManager;
+import model.Booking;
 import model.Tour;
 import tools.Inputter;
 
@@ -11,6 +13,7 @@ public class Main {
         Inputter input = new Inputter();
         HomestayManager hm = new HomestayManager();
         TourManager tm = new TourManager();
+        BookingManager bm = new BookingManager();
         int choice;
         do {
             choice = input.getInt("=========== MENU ===========\n"
@@ -35,6 +38,32 @@ public class Main {
                     String tourId = input.getString("Enter tour ID to update: ");
                     Tour updatedTour = input.updateTour();
                     tm.updateTour(tourId, hm, updatedTour);
+                    break;
+                case 3:
+                    tm.listPastTours();
+                    break;
+                case 4:
+                    tm.listTotalBookingAmount(bm);
+                    break;
+                case 5:
+                    Booking newBooking = input.inputBooking();
+                    bm.addNewBooking(hm, tm, newBooking);
+                    break;
+                case 6:
+                    String removeBooking = input.getString("Enter booking ID to remove: ");
+                    bm.remove(removeBooking);
+                    break;
+                case 7:
+                    String bookingId = input.getString("Enter booking ID to update: ");
+                    Booking updatedBooking = input.updateBooking();
+                    bm.update(updatedBooking, hm, tm);
+                    break;
+                case 8:
+                    String fullName = input.getString("Enter full name to search: ");
+                    bm.listByFullName(fullName);
+                    break;
+                case 9:
+                    bm.statisticsTotalTourists();
                     break;
                 case 10:
                     System.out.println("END...");

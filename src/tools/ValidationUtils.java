@@ -10,7 +10,8 @@ public interface ValidationUtils {
     public final String DOUBLE_VALID = "^-?\\d+(\\.\\d+)?$";
     public final String POSITIVE_DOUBLE_VALID = "^\\d+(\\.\\d+)?$";
     public final String TourName_VALID = "^[a-zA-Z0-9\\s-]{1,50}$";
-    
+    public final String FullName_VALID = "^[a-zA-Z\\s]{1,50}$";
+    public final String Phone_VALID = "^0\\d{9}$";
     public static boolean isValid(String data, String pattern){
         return data.matches(pattern);
     }

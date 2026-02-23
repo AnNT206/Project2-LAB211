@@ -9,6 +9,8 @@ public class Booking {
     private String tourId;
     private Date bookingDate;
     private String phone;
+    private int numberOfPeople;
+    private double totalAmount;
 
     //constructor
     public Booking() {
@@ -61,6 +63,29 @@ public class Booking {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public int getNumberOfPeople() {
+        return numberOfPeople;
+    }
+
+    public void setNumberOfPeople(int numberOfPeople) {
+        this.numberOfPeople = numberOfPeople;
+    }
+
+    public double getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(double totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    @Override
+    public String toString() {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy");
+        return String.format("%-12s| %-20s | %-10s | %-12s | %-12s | %-14d | %-12.2f\n",
+                bookingId, fullName, tourId, sdf.format(bookingDate), phone, numberOfPeople, totalAmount);
     }
 
 }

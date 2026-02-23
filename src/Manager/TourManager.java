@@ -1,9 +1,10 @@
 package Manager;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import model.Booking;
 import model.Homestay;
 import model.Tour;
 import tools.FileUtils;
@@ -20,6 +21,21 @@ public class TourManager {
         this.saved = true;
         this.pathFile = "./Tours.txt";
         readFromFile();
+
+        //test
+        Tour t = new Tour();
+        t.setTourId("T00011");
+        t.setTourName("Ha Long Bay Tour");
+        t.setPrice(100.0);
+        t.setHomeId("hs0001");
+        t.setDepartureDate(new Date());
+        t.setEndDate(new Date());
+        t.setTourist(2);
+        t.setBooking(false);
+        tourList.add(t);
+        saved = false;
+        System.out.println("Tour added: " + t.getTourId());
+        System.out.println("Tour: " + t.toString());
     }
 
     public Tour findById(String TourId) {
@@ -35,6 +51,7 @@ public class TourManager {
     public boolean addNew(HomestayManager hm, Tour t) {
         //check isDuplicate
         if (findById(t.getTourId()) != null) {
+            System.out.println("Tour ID already exists");
             return false;
         }
 
@@ -108,12 +125,76 @@ public class TourManager {
         return true;
     }
 
-    //List tour
-    public void listTour() {
-        System.out.println("-------TOUR LIST-------");
-        for (Tour t : tourList) {
-            System.out.println(t);
+
+    //List tours with departure dates earlier than current date
+    public void listPastTours() {
+        java.util.Date currentDate = new java.util.Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        sdf.setLenient(false);
+
+        System.out.println("======= TOURS WITH PAST DEPARTURE DATES =======");
+        System.out.println("Current Date: " + sdf.format(currentDate));
+        System.out.println("-------------------------------------------------");
+        System.out.printf("%-10s | %-25s | %-12s | %-12s | %-10s | %-8s%n",
+                "Tour ID", "Tour Name", "Departure", "End Date", "Tourists", "Booking");
+        System.out.println("-------------------------------------------------");
+
+        int count = 0;
+        for (Tour tour : tourList) {
+            if (tour.getDepartureDate().before(currentDate)) {
+                System.out.printf("%-10s | %-25s | %-12s | %-12s | %-10d | %-8s%n",
+                        tour.getTourId(),
+                        tour.getTourName(),
+                        sdf.format(tour.getDepartureDate()),
+                        sdf.format(tour.getEndDate()),
+                        tour.getTourist(),
+                        tour.isBooking() ? "True" : "False");
+                count++;
+            }
         }
+
+        System.out.println("-------------------------------------------------");
+        System.out.println("Total tours with past departure dates: " + count);
+    }
+
+    //List total booking amount for tours with departure dates later than current date
+    public void listTotalBookingAmount(BookingManager bm) {
+        java.util.Date currentDate = new java.util.Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        sdf.setLenient(false);
+
+        System.out.println("======= TOURS WITH FUTURE DEPARTURE DATES =======");
+        System.out.println("Current Date: " + sdf.format(currentDate));
+        System.out.println("-------------------------------------------------");
+        System.out.printf("%-10s | %-25s | %-10s | %-15s%n", "Tour ID", "Tour Name", "Bookings", "Total Amount");
+        System.out.println("-------------------------------------------------");
+
+        double grandTotal = 0;
+
+        for (Tour tour : tourList) {
+            if (tour.getDepartureDate().after(currentDate)) {
+                // Count bookings and calculate total amount for this tour
+                int bookingCount = 0;
+                double totalAmount = 0;
+                for (Booking booking : bm.getBookingList()) {
+                    if (booking.getTourId().equalsIgnoreCase(tour.getTourId())) {
+                        bookingCount++;
+                        totalAmount += booking.getTotalAmount();
+                    }
+                }
+
+                grandTotal += totalAmount;
+
+                System.out.printf("%-10s | %-25s | %-10d | $%-15.2f%n",
+                        tour.getTourId(),
+                        tour.getTourName(),
+                        bookingCount,
+                        totalAmount);
+            }
+        }
+
+        System.out.println("-------------------------------------------------");
+        System.out.printf("Grand Total: $%.2f%n", grandTotal);
     }
 
     public final void readFromFile() {
