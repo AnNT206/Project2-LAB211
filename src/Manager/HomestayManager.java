@@ -61,7 +61,7 @@ public class HomestayManager {
             x.setHomeName(part[1].trim());
             x.setRoomNumber(Integer.parseInt(part[2].trim()));
 
-            // Build address from parts 3 to (n-1)
+            //duyệt mảng phần tử ở index thứ 3
             StringBuilder address = new StringBuilder();
             for (int i = 3; i < part.length - 1; i++) {
                 if (i > 3) {
@@ -70,10 +70,9 @@ public class HomestayManager {
                 address.append(part[i].trim());
             }
             x.setAddress(address.toString());
-
             x.setMaximumcapacity(Integer.parseInt(part[part.length - 1].trim()));
             return x;
-
+            
         } catch (Exception e) {
             return null;
         }

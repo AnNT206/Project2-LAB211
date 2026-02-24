@@ -140,31 +140,64 @@ public class BookingManager {
             return false;
         }
 
-        // Check if the new tour exists
-        if (tm.findById(updateBooking.getTourId()) == null) {
-            System.out.println("Tour ID does not exist");
-            return false;
+        // Check if the new tour exists only if tourId is being updated (not empty)
+        Tour tour = null;
+        if (updateBooking.getTourId() != null && !updateBooking.getTourId().trim().isEmpty()) {
+            tour = tm.findById(updateBooking.getTourId());
+            if (tour == null) {
+                System.out.println("Tour ID does not exist");
+                return false;
+            }
         }
 
-        // Get the tour to check homestay
-        Tour tour = tm.findById(updateBooking.getTourId());
-        if (tour == null) {
-            System.out.println("Tour does not exist");
-            return false;
-        }
-
-        // Check if homestay exists
-        if (hm.findById(tour.getHomeId()) == null) {
+        // Check if homestay exists for the tour only if tour is being updated
+        if (tour != null && hm.findById(tour.getHomeId()) == null) {
             System.out.println("Homestay ID does not exist");
             return false;
         }
 
-        existing.setFullName(updateBooking.getFullName());
-        existing.setTourId(updateBooking.getTourId());
-        existing.setBookingDate(updateBooking.getBookingDate());
-        existing.setPhone(updateBooking.getPhone());
-        existing.setNumberOfPeople(updateBooking.getNumberOfPeople());
-        existing.setTotalAmount(updateBooking.getTotalAmount());
+        // Validate capacity only if numberOfPeople is being updated (greater than 0)
+        if (updateBooking.getNumberOfPeople() > 0 && tour != null) {
+            Homestay homestay = hm.findById(tour.getHomeId());
+            if (homestay != null) {
+                int remaining = homestay.getMaximumcapacity() - tour.getTourist();
+                if (updateBooking.getNumberOfPeople() > remaining) {
+                    System.out.println("Exceeds homestay capacity!");
+                    return false;
+                }
+            }
+        }
+
+        // Update fields only if they are not empty/null/zero
+        if (updateBooking.getFullName() != null && !updateBooking.getFullName().trim().isEmpty()) {
+            existing.setFullName(updateBooking.getFullName());
+        }
+
+        if (updateBooking.getTourId() != null && !updateBooking.getTourId().trim().isEmpty()) {
+            existing.setTourId(updateBooking.getTourId());
+        }
+
+        if (updateBooking.getBookingDate() != null) {
+            existing.setBookingDate(updateBooking.getBookingDate());
+        }
+
+        if (updateBooking.getPhone() != null && !updateBooking.getPhone().trim().isEmpty()) {
+            existing.setPhone(updateBooking.getPhone());
+        }
+
+        if (updateBooking.getNumberOfPeople() > 0) {
+            existing.setNumberOfPeople(updateBooking.getNumberOfPeople());
+            // Recalculate total amount if numberOfPeople changed
+            if (tour != null) {
+                double total = tour.getPrice() * updateBooking.getNumberOfPeople();
+                existing.setTotalAmount(total);
+            }
+        }
+
+        if (updateBooking.getTotalAmount() != 0) {
+            existing.setTotalAmount(updateBooking.getTotalAmount());
+        }
+
         saved = false;
         System.out.println("Update booking successfully");
         return true;
@@ -191,7 +224,8 @@ public class BookingManager {
     public void listByFullName(String fullName) {
         System.out.println("Booking List for '" + fullName + "':");
         System.out.println("--------------------------------");
-        System.out.println("Booking ID | Full Name | Tour ID | Booking Date | Phone | NumberOfPeople | TotalAmount");
+        System.out.printf("%-12s | %-20s | %-10s | %-12s | %-12s | %-14s | %-12s%n", "Booking ID", "Full Name", "Tour ID", "Booking Date", "Phone", "NumberOfPeople", "TotalAmount");
+        
         System.out.println("--------------------------------");
 
         boolean found = false;
@@ -201,6 +235,7 @@ public class BookingManager {
                 found = true;
             }
         }
+
 
         if (!found) {
             System.out.println("No bookings found with name containing: " + fullName);

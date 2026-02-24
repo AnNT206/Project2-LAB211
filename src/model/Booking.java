@@ -84,8 +84,9 @@ public class Booking {
     @Override
     public String toString() {
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy");
-        return String.format("%-12s| %-20s | %-10s | %-12s | %-12s | %-14d | %-12.2f\n",
-                bookingId, fullName, tourId, sdf.format(bookingDate), phone, numberOfPeople, totalAmount);
+        String bookingDateStr = bookingDate != null ? sdf.format(bookingDate) : "N/A";
+        return String.format("%-12s | %-20s | %-10s | %-12s | %-12s | %-14d | %-12.2f",
+                bookingId, fullName, tourId, bookingDateStr, phone, numberOfPeople, totalAmount);
     }
 
 }

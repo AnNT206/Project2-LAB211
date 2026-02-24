@@ -97,28 +97,59 @@ public class TourManager {
             return false;
         }
 
-        if (hm.findById(updatedTour.getHomeId()) == null) {
-            System.out.println("Home ID does not exitst");
-            return false;
+        // Validate only if homeId is being updated (not empty)
+        if (updatedTour.getHomeId() != null && !updatedTour.getHomeId().trim().isEmpty()) {
+            if (hm.findById(updatedTour.getHomeId()) == null) {
+                System.out.println("Home ID does not exist");
+                return false;
+            }
         }
 
-        if (!updatedTour.getEndDate().after(updatedTour.getDepartureDate())) {
-            System.out.println("End date must be after departure date");
-            return false;
+        // Validate dates only if both are provided
+        if (updatedTour.getDepartureDate() != null && updatedTour.getEndDate() != null) {
+            if (!updatedTour.getEndDate().after(updatedTour.getDepartureDate())) {
+                System.out.println("End date must be after departure date");
+                return false;
+            }
         }
 
-        if (updatedTour.getTourist() <= 0) {
-            System.out.println("Number of tourist must be greater than 0");
-            return false;
+        // Validate tourist only if being updated (greater than 0)
+        if (updatedTour.getTourist() > 0) {
+            Homestay homestay = hm.findById(existing.getHomeId());
+            if (updatedTour.getTourist() > homestay.getMaximumcapacity()) {
+                System.out.println("Number of tourists exceeds maximum capacity of homestay");
+                return false;
+            }
         }
 
-        //update new information
-        existing.setTourName(updatedTour.getTourName());
-        existing.setPrice(updatedTour.getPrice());
-        existing.setHomeId(updatedTour.getHomeId());
-        existing.setDepartureDate(updatedTour.getDepartureDate());
-        existing.setEndDate(updatedTour.getEndDate());
-        existing.setTourist(updatedTour.getTourist());
+        // Update fields only if they are not empty/null/zero
+        if (updatedTour.getTourName() != null && !updatedTour.getTourName().trim().isEmpty()) {
+            existing.setTourName(updatedTour.getTourName());
+        }
+
+        if (updatedTour.getPrice() != 0) {
+            existing.setPrice(updatedTour.getPrice());
+        }
+
+        if (updatedTour.getHomeId() != null && !updatedTour.getHomeId().trim().isEmpty()) {
+            existing.setHomeId(updatedTour.getHomeId());
+        }
+
+        if (updatedTour.getDepartureDate() != null) {
+            existing.setDepartureDate(updatedTour.getDepartureDate());
+        }
+
+        if (updatedTour.getEndDate() != null) {
+            existing.setEndDate(updatedTour.getEndDate());
+        }
+
+        if (updatedTour.getTourist() > 0) {
+            existing.setTourist(updatedTour.getTourist());
+        }
+
+        if (updatedTour.getTime() != null && !updatedTour.getTime().trim().isEmpty()) {
+            existing.setTime(updatedTour.getTime());
+        }
 
         saved = false;
         System.out.println("Update tour successfully");
@@ -163,20 +194,17 @@ public class TourManager {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         sdf.setLenient(false);
 
-        System.out.println("======= TOURS WITH FUTURE DEPARTURE DATES =======");
-        System.out.println("Current Date: " + sdf.format(currentDate));
-        System.out.println("-------------------------------------------------");
-        System.out.printf("%-10s | %-25s | %-10s | %-15s%n", "Tour ID", "Tour Name", "Bookings", "Total Amount");
-        System.out.println("-------------------------------------------------");
-
+        // Collect tour data with booking amounts
+        java.util.List<Object[]> tourData = new java.util.ArrayList<>();
         double grandTotal = 0;
 
         for (Tour tour : tourList) {
             if (tour.getDepartureDate().after(currentDate)) {
-                // Count bookings and calculate total amount for this tour
-                int bookingCount = 0;
+                // Calculate total booking amount for this tour
                 double totalAmount = 0;
-                for (Booking booking : bm.getBookingList()) {
+                int bookingCount = 0;
+
+                for (model.Booking booking : bm.getBookingList()) {
                     if (booking.getTourId().equalsIgnoreCase(tour.getTourId())) {
                         bookingCount++;
                         totalAmount += booking.getTotalAmount();
@@ -185,12 +213,27 @@ public class TourManager {
 
                 grandTotal += totalAmount;
 
-                System.out.printf("%-10s | %-25s | %-10d | $%-15.2f%n",
-                        tour.getTourId(),
-                        tour.getTourName(),
-                        bookingCount,
-                        totalAmount);
+                // Store tour data: [tourId, tourName, bookingCount, totalAmount]
+                tourData.add(new Object[]{tour.getTourId(), tour.getTourName(), bookingCount, totalAmount});
             }
+        }
+
+        // Sort by total amount in descending order
+        tourData.sort((a, b) -> Double.compare((Double) b[3], (Double) a[3]));
+
+        // Display results
+        System.out.println("======= TOURS WITH FUTURE DEPARTURE DATES =======");
+        System.out.println("Current Date: " + sdf.format(currentDate));
+        System.out.println("-------------------------------------------------");
+        System.out.printf("%-10s | %-25s | %-10s | %-15s%n", "Tour ID", "Tour Name", "Bookings", "Total Amount");
+        System.out.println("-------------------------------------------------");
+
+        for (Object[] data : tourData) {
+            System.out.printf("%-10s | %-25s | %-10d | $%-15.2f%n",
+                    data[0],
+                    data[1],
+                    data[2],
+                    data[3]);
         }
 
         System.out.println("-------------------------------------------------");

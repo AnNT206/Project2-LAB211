@@ -31,8 +31,8 @@ public class Main {
                     + "Enter your choice: ");
             switch (choice) {
                 case 1:
-                    Tour newTour = input.inputTour();
-                    tm.addNew(hm, newTour);
+                    Tour tour = input.inputTour();
+                    tm.addNew(hm, tour);
                     break;
                 case 2:
                     String tourId = input.getString("Enter tour ID to update: ");

@@ -29,7 +29,20 @@ public class Inputter {
         }
         return kq;
     }
-    
+
+    //optional integer input - allows empty
+    public int getIntOptional(String message){
+        String temp = getString(message).trim();
+        if (temp.isEmpty()) {
+            return 0;
+        }
+        if(ValidationUtils.isValid(temp, ValidationUtils.INTEGER_VALID)){
+            return Integer.parseInt(temp);
+        }
+        System.out.println("Invalid number!");
+        return getIntOptional(message);
+    }
+
     //Nhập dữ liệu kiểu số thực
     public double getDouble(String message){
         double kq = 0;
@@ -38,6 +51,19 @@ public class Inputter {
             kq = Double.parseDouble(temp);
         }
         return kq;
+    }
+
+    //optional double input - allows empty
+    public double getDoubleOptional(String message){
+        String temp = getString(message).trim();
+        if (temp.isEmpty()) {
+            return 0.0;
+        }
+        if(ValidationUtils.isValid(temp, ValidationUtils.DOUBLE_VALID)){
+            return Double.parseDouble(temp);
+        }
+        System.out.println("Invalid number!");
+        return getDoubleOptional(message);
     }
     
     //check data
@@ -77,12 +103,12 @@ public class Inputter {
     //update tour
     public Tour updateTour(){
         Tour t = new Tour();
-        t.setTourName(inputAndLoop("Enter tour name: ", ValidationUtils.TourName_VALID, true));
-        t.setPrice(getDouble("Enter price: "));
-        t.setHomeId(inputAndLoop("Enter home ID: ", ValidationUtils.HomeID_VALID, true));
-        t.setDepartureDate(getDate("Enter departure date (dd/MM/yyyy): "));
-        t.setEndDate(getDate("Enter end date (dd/MM/yyyy): "));
-        t.setTourist(getInt("Enter number of tourist: "));
+        t.setTourName(inputAndLoop("Enter tour name: ", ValidationUtils.TourName_VALID, false));
+        t.setPrice(getDoubleOptional("Enter price: "));
+        t.setHomeId(inputAndLoop("Enter home ID: ", ValidationUtils.HomeID_VALID, false));
+        t.setDepartureDate(getDateOptional("Enter departure date (dd/MM/yyyy): "));
+        t.setEndDate(getDateOptional("Enter end date (dd/MM/yyyy): "));
+        t.setTourist(getIntOptional("Enter number of tourist: "));
         return t;
     }
     
@@ -95,19 +121,17 @@ public class Inputter {
         b.setBookingDate(getDate("Enter booking date (dd/MM/yyyy): "));
         b.setPhone(inputAndLoop("Enter phone number: ", ValidationUtils.Phone_VALID, true));
         b.setNumberOfPeople(getInt("Enter number of people: "));
-        b.setTotalAmount(getDouble("Enter total amount: "));
         return b;
     }
     
     //update booking
     public Booking updateBooking(){
         Booking b = new Booking();
-        b.setFullName(inputAndLoop("Enter full name: ", ValidationUtils.FullName_VALID, true));
-        b.setTourId(inputAndLoop("Enter tour ID: ", ValidationUtils.TourID_VALID, true));
-        b.setBookingDate(getDate("Enter booking date (dd/MM/yyyy): "));
-        b.setPhone(inputAndLoop("Enter phone number: ", ValidationUtils.Phone_VALID, true));
-        b.setNumberOfPeople(getInt("Enter number of people: "));
-        b.setTotalAmount(getDouble("Enter total amount: "));
+        b.setFullName(inputAndLoop("Enter full name: ", ValidationUtils.FullName_VALID, false));
+        b.setTourId(inputAndLoop("Enter tour ID: ", ValidationUtils.TourID_VALID, false));
+        b.setBookingDate(getDateOptional("Enter booking date (dd/MM/yyyy): "));
+        b.setPhone(inputAndLoop("Enter phone number: ", ValidationUtils.Phone_VALID, false));
+        b.setNumberOfPeople(getIntOptional("Enter number of people: "));
         return b;
     }
     
@@ -121,6 +145,22 @@ public class Inputter {
         } catch (Exception e) {
             System.out.println("Invalid date format! Plese use dd/MM/yyyy");
             return getDate(mess);
+        }
+    }
+
+    //optional date input - allows empty
+    public Date getDateOptional(String mess){
+        String dateStr = getString(mess).trim();
+        if (dateStr.isEmpty()) {
+            return null;
+        }
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            sdf.setLenient(false);
+            return sdf.parse(dateStr);
+        } catch (Exception e) {
+            System.out.println("Invalid date format! Please use dd/MM/yyyy");
+            return getDateOptional(mess);
         }
     }
 }
