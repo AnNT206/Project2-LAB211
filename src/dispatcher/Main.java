@@ -54,9 +54,9 @@ public class Main {
                     bm.remove(removeBooking);
                     break;
                 case 7:
-                    String bookingId = input.getString("Enter booking ID to update: ");
+                    String bookingID = input.getString("Enter booking ID to update: ");
                     Booking updatedBooking = input.updateBooking();
-                    bm.update(updatedBooking, hm, tm);
+                    bm.update(bookingID, updatedBooking, hm, tm);
                     break;
                 case 8:
                     String fullName = input.getString("Enter full name to search: ");

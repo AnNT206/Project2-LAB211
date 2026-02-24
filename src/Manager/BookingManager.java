@@ -133,8 +133,8 @@ public class BookingManager {
     }
 
     //update
-    public boolean update(Booking updateBooking, HomestayManager hm, TourManager tm) {
-        Booking existing = findById(updateBooking.getBookingId());
+    public boolean update(String bookingID, Booking updateBooking, HomestayManager hm, TourManager tm) {
+        Booking existing = findById(bookingID);
         if (existing == null) {
             System.out.println("Booking ID does not exist");
             return false;

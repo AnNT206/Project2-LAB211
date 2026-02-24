@@ -46,72 +46,35 @@ public class HomestayManager {
     //textToObject
     public Homestay textToObject(String temp) {
         try {
-            // Replace multiple spaces with single space to normalize
-            temp = temp.replaceAll("\\s+", " ").trim();
+            temp = temp.trim();
+            if (temp.isEmpty()) {
+                return null;
+            }
 
             String[] part = temp.split("-");
-            if (part.length < 4) {
+            if (part.length < 5) {
                 return null;
             }
 
             Homestay x = new Homestay();
             x.setHomeID(part[0].trim());
+            x.setHomeName(part[1].trim());
+            x.setRoomNumber(Integer.parseInt(part[2].trim()));
 
-            // Extract room number from home name (last number before the first hyphen)
-            String homeNameWithRoom = part[1].trim();
-            String[] nameParts = homeNameWithRoom.split("\\s+");
-            int roomNumber = -1;
-            StringBuilder homeName = new StringBuilder();
-
-            // Find the last numeric part in the home name as room number
-            for (int i = nameParts.length - 1; i >= 0; i--) {
-                if (nameParts[i].matches("\\d+")) {
-                    roomNumber = Integer.parseInt(nameParts[i]);
-                    // Build home name without the room number
-                    for (int j = 0; j < i; j++) {
-                        homeName.append(nameParts[j]);
-                        if (j < i - 1) {
-                            homeName.append(" ");
-                        }
-                    }
-                    break;
+            // Build address from parts 3 to (n-1)
+            StringBuilder address = new StringBuilder();
+            for (int i = 3; i < part.length - 1; i++) {
+                if (i > 3) {
+                    address.append("-");
                 }
+                address.append(part[i].trim());
             }
+            x.setAddress(address.toString());
 
-            if (roomNumber == -1) {
-                // No room number found in home name, use the next part as room number
-                x.setHomeName(homeNameWithRoom);
-                x.setRoomNumber(Integer.parseInt(part[2].trim()));
-                // Address is parts 3 to (n-1)
-                StringBuilder address = new StringBuilder();
-                for (int i = 3; i < part.length - 1; i++) {
-                    if (i > 3) {
-                        address.append("-");
-                    }
-                    address.append(part[i].trim());
-                }
-                x.setAddress(address.toString());
-            } else {
-                // Room number found in home name
-                x.setHomeName(homeName.toString());
-                x.setRoomNumber(roomNumber);
-                // Address is parts 2 to (n-1) (since room number was in home name)
-                StringBuilder address = new StringBuilder();
-                for (int i = 2; i < part.length - 1; i++) {
-                    if (i > 2) {
-                        address.append("-");
-                    }
-                    address.append(part[i].trim());
-                }
-                x.setAddress(address.toString());
-            }
-
-            // Last part is the maximum capacity
             x.setMaximumcapacity(Integer.parseInt(part[part.length - 1].trim()));
             return x;
 
         } catch (Exception e) {
-            System.out.println("Error parsing line: " + e.getMessage());
             return null;
         }
     }
