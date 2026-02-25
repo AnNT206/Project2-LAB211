@@ -21,35 +21,17 @@ public class BookingManager {
         this.saved = true;
         this.pathFile = "./Bookings.txt";
         readFromFile();
-
-        //test
-        Booking b = new Booking();
-        b.setBookingId("b00011");
-        b.setFullName("John Doe");
-        b.setTourId("T00011");
-        b.setBookingDate(new Date());
-        b.setPhone("0909090909");
-        b.setNumberOfPeople(2);
-        b.setTotalAmount(200.0);
-        bookingList.add(b);
-        saved = false;
-        System.out.println("Booking added: " + b.getBookingId());
-        System.out.println("Booking: " + b.toString());
     }
 
     //readFromFile
     public final void readFromFile() {
         bookingList.clear();
         List<String> lines = FileUtils.readLines(pathFile);
-        System.out.println("Lines read: " + lines.size());
 
         for (String line : lines) {
             Booking b = textToObject(line);
             if (b != null) {
                 bookingList.add(b);
-                System.out.println("Loaded booking: " + b.getBookingId() + " - " + b.getFullName());
-            } else {
-                System.out.println("Failed to parse line: " + line);
             }
         }
         System.out.println("Total bookings loaded: " + bookingList.size());
@@ -84,10 +66,9 @@ public class BookingManager {
             b.setBookingDate(sdf.parse(part[3]));
             b.setPhone(part[4]);
 
-            // Handle optional fields (numberOfPeople, totalAmount)
-            if (part.length >= 7) {
-                b.setNumberOfPeople(Integer.parseInt(part[5]));
-                b.setTotalAmount(Double.parseDouble(part[6]));
+            // Handle optional field (totalAmount)
+            if (part.length >= 6) {
+                b.setTotalAmount(Double.parseDouble(part[5]));
             }
             return b;
         } catch (Exception e) {
@@ -116,16 +97,8 @@ public class BookingManager {
             return false;
         }
 
-        int remaining = homestay.getMaximumcapacity() - tour.getTourist();
-        if (newBooking.getNumberOfPeople() > remaining) {
-            System.out.println("Exceeds homestay capacity!");
-            return false;
-        }
 
-        double total = tour.getPrice() * newBooking.getNumberOfPeople();
-        newBooking.setTotalAmount(total);
         bookingList.add(newBooking);
-        tour.setTourist(tour.getTourist() + newBooking.getNumberOfPeople());
         tour.setBooking(true);
         saved = false;
         System.out.println("Add booking successfully");
@@ -140,32 +113,27 @@ public class BookingManager {
             return false;
         }
 
-        // Check if the new tour exists only if tourId is being updated (not empty)
+        // Get the tour - either the new tour if tourId is being updated, or the existing tour's tourId
         Tour tour = null;
+        String tourIdToUse = existing.getTourId(); // Mặc định lấy Tour ID đang có trong hệ thống
+
         if (updateBooking.getTourId() != null && !updateBooking.getTourId().trim().isEmpty()) {
-            tour = tm.findById(updateBooking.getTourId());
+            // User is updating to a new tour
+            tourIdToUse = updateBooking.getTourId();
+            tour = tm.findById(tourIdToUse);
             if (tour == null) {
                 System.out.println("Tour ID does not exist");
                 return false;
             }
+        } else {
+            // User is not changing tour, get the existing tour
+            tour = tm.findById(existing.getTourId());
         }
 
-        // Check if homestay exists for the tour only if tour is being updated
+        // Check if homestay exists for the tour
         if (tour != null && hm.findById(tour.getHomeId()) == null) {
             System.out.println("Homestay ID does not exist");
             return false;
-        }
-
-        // Validate capacity only if numberOfPeople is being updated (greater than 0)
-        if (updateBooking.getNumberOfPeople() > 0 && tour != null) {
-            Homestay homestay = hm.findById(tour.getHomeId());
-            if (homestay != null) {
-                int remaining = homestay.getMaximumcapacity() - tour.getTourist();
-                if (updateBooking.getNumberOfPeople() > remaining) {
-                    System.out.println("Exceeds homestay capacity!");
-                    return false;
-                }
-            }
         }
 
         // Update fields only if they are not empty/null/zero
@@ -183,19 +151,6 @@ public class BookingManager {
 
         if (updateBooking.getPhone() != null && !updateBooking.getPhone().trim().isEmpty()) {
             existing.setPhone(updateBooking.getPhone());
-        }
-
-        if (updateBooking.getNumberOfPeople() > 0) {
-            existing.setNumberOfPeople(updateBooking.getNumberOfPeople());
-            // Recalculate total amount if numberOfPeople changed
-            if (tour != null) {
-                double total = tour.getPrice() * updateBooking.getNumberOfPeople();
-                existing.setTotalAmount(total);
-            }
-        }
-
-        if (updateBooking.getTotalAmount() != 0) {
-            existing.setTotalAmount(updateBooking.getTotalAmount());
         }
 
         saved = false;
@@ -221,17 +176,32 @@ public class BookingManager {
     }
 
     //listByFullName
-    public void listByFullName(String fullName) {
+    public void listByFullName(String fullName, TourManager tm) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         System.out.println("Booking List for '" + fullName + "':");
         System.out.println("--------------------------------");
-        System.out.printf("%-12s | %-20s | %-10s | %-12s | %-12s | %-14s | %-12s%n", "Booking ID", "Full Name", "Tour ID", "Booking Date", "Phone", "NumberOfPeople", "TotalAmount");
-        
+        System.out.printf("%-12s | %-20s | %-10s | %-12s | %-12s | %-12s%n", "Booking ID", "Full Name", "Tour ID", "Booking Date", "Phone", "TotalAmount");
+
         System.out.println("--------------------------------");
 
         boolean found = false;
         for (Booking booking : bookingList) {
             if (booking.getFullName().toLowerCase().contains(fullName.toLowerCase())) {
-                System.out.println(booking.toString());
+                // Calculate total amount using tour's tourist count and price
+                Tour tour = tm.findById(booking.getTourId());
+                double totalAmount = 0.0;
+                if (tour != null) {
+                    totalAmount = tour.getTourist() * tour.getPrice();
+                }
+
+                String bookingDateStr = booking.getBookingDate() != null ? sdf.format(booking.getBookingDate()) : "N/A";
+                System.out.printf("%-12s | %-20s | %-10s | %-12s | %-12s | %-12.2f%n",
+                        booking.getBookingId(),
+                        booking.getFullName(),
+                        booking.getTourId(),
+                        bookingDateStr,
+                        booking.getPhone(),
+                        totalAmount);
                 found = true;
             }
         }
@@ -244,11 +214,14 @@ public class BookingManager {
     }
 
     //statistics total number of tourists
-    public void statisticsTotalTourists() {
+    public void statisticsTotalTourists(TourManager tm) {
         int totalTourists = 0;
 
         for (Booking booking : bookingList) {
-            totalTourists += booking.getNumberOfPeople();
+            Tour tour = tm.findById(booking.getTourId());
+            if (tour != null) {
+                totalTourists += tour.getTourist();
+            }
         }
 
         System.out.println("======= TOURIST STATISTICS =======");

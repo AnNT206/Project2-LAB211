@@ -29,15 +29,11 @@ public class HomestayManager {
         homestayList.clear();
 
         List<String> lines = FileUtils.readLines(pathFile);
-        System.out.println("Lines read: " + lines.size());
 
         for (String line : lines) {
             Homestay x = textToObject(line);
             if (x != null) {
                 homestayList.add(x);
-                System.out.println("Loaded homestay: " + x.getHomeID() + " - " + x.getHomeName());
-            } else {
-                System.out.println("Failed to parse line: " + line);
             }
         }
         System.out.println("Total homestays loaded: " + homestayList.size());
@@ -86,5 +82,52 @@ public class HomestayManager {
             }
         }
         return null;
+    }
+
+    //statistics on total number of tourists who have booked each homestay
+    public void statisticsTouristsByHomestay(TourManager tm, BookingManager bm) {
+        System.out.println("======= HOMESTAY BOOKING STATISTICS =======");
+        System.out.printf("%-10s | %-25s | %-15s | %-15s | %-15s%n",
+                "Home ID", "Home Name", "Max Capacity", "Booked Tours", "Total Tourists");
+        System.out.println("-------------------------------------------------------------------------");
+
+        int grandTotalTourists = 0;
+
+        for (Homestay homestay : homestayList) {
+            int bookedTourists = 0;
+            int bookedTours = 0;
+
+            // Find all tours for this homestay and sum up the tourists
+            for (model.Tour tour : tm.getTourList()) {
+                if (tour.getHomeId().equalsIgnoreCase(homestay.getHomeID())) {
+                    // Check if this tour has bookings
+                    boolean hasBooking = false;
+                    for (model.Booking booking : bm.getBookingList()) {
+                        if (booking.getTourId().equalsIgnoreCase(tour.getTourId())) {
+                            hasBooking = true;
+                            break;
+                        }
+                    }
+
+                    if (hasBooking) {
+                        bookedTours++;
+                        bookedTourists += tour.getTourist();
+                    }
+                }
+            }
+
+            grandTotalTourists += bookedTourists;
+
+            System.out.printf("%-10s | %-25s | %-15d | %-15d | %-15d%n",
+                    homestay.getHomeID(),
+                    homestay.getHomeName(),
+                    homestay.getMaximumcapacity(),
+                    bookedTours,
+                    bookedTourists);
+        }
+
+        System.out.println("-------------------------------------------------------------------------");
+        System.out.println("Total tourists who have booked homestays: " + grandTotalTourists);
+        System.out.println("===========================================");
     }
 }

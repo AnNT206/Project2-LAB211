@@ -1,4 +1,3 @@
-
 package tools;
 
 import java.util.Date;
@@ -8,82 +7,83 @@ import model.Booking;
 import model.Tour;
 
 public class Inputter {
+
     private Scanner ndl;
 
     public Inputter() {
         this.ndl = new Scanner(System.in);
-    } 
-    
+    }
+
     //Nhập dữ liệu kiểu chuỗi
-    public String getString(String message){
+    public String getString(String message) {
         System.out.print(message);
         return ndl.nextLine();
     }
-    
+
     //Nhập dữ liệu kiểu số nguyên
-    public int getInt(String message){
+    public int getInt(String message) {
         int kq = 0;
         String temp = getString(message);
-        if(ValidationUtils.isValid(temp, ValidationUtils.INTEGER_VALID)){
+        if (ValidationUtils.isValid(temp, ValidationUtils.INTEGER_VALID)) {
             kq = Integer.parseInt(temp);
         }
         return kq;
     }
 
-    //optional integer input - allows empty
-    public int getIntOptional(String message){
-        String temp = getString(message).trim();
+    //optional integer input - allows empty, returns MIN_VALUE as sentinel for "skip"
+    public int getIntOptional(String mess) {
+        String temp = getString(mess).trim();
         if (temp.isEmpty()) {
-            return 0;
+            return Integer.MIN_VALUE;
         }
-        if(ValidationUtils.isValid(temp, ValidationUtils.INTEGER_VALID)){
+        if (ValidationUtils.isValid(temp, ValidationUtils.INTEGER_VALID)) {
             return Integer.parseInt(temp);
         }
         System.out.println("Invalid number!");
-        return getIntOptional(message);
+        return getIntOptional(mess);
     }
 
     //Nhập dữ liệu kiểu số thực
-    public double getDouble(String message){
+    public double getDouble(String message) {
         double kq = 0;
         String temp = getString(message);
-        if(ValidationUtils.isValid(temp, ValidationUtils.DOUBLE_VALID)){
+        if (ValidationUtils.isValid(temp, ValidationUtils.DOUBLE_VALID)) {
             kq = Double.parseDouble(temp);
         }
         return kq;
     }
 
-    //optional double input - allows empty
-    public double getDoubleOptional(String message){
-        String temp = getString(message).trim();
+    //optional double input - allows empty, returns -Infinity as sentinel for "skip"
+    public double getDoubleOptional(String mess) {
+        String temp = getString(mess).trim();
         if (temp.isEmpty()) {
-            return 0.0;
+            return Double.NEGATIVE_INFINITY;
         }
-        if(ValidationUtils.isValid(temp, ValidationUtils.DOUBLE_VALID)){
+        if (ValidationUtils.isValid(temp, ValidationUtils.DOUBLE_VALID)) {
             return Double.parseDouble(temp);
         }
         System.out.println("Invalid number!");
-        return getDoubleOptional(message);
+        return getDoubleOptional(mess);
     }
-    
+
     //check data
-    public String inputAndLoop(String message, String pattern, boolean isLoop){
+    public String inputAndLoop(String message, String pattern, boolean isLoop) {
         String result;
         boolean isInvalid;
-        
-        do{
+
+        do {
             result = getString(message).trim();
             //Optional: cho phép bỏ trống
-            if(!isLoop && result.isEmpty()){
+            if (!isLoop && result.isEmpty()) {
                 return result;
             }
-            
+
             isInvalid = !ValidationUtils.isValid(result, pattern);
-            
-            if(isInvalid && isLoop){
+
+            if (isInvalid && isLoop) {
                 System.out.println("Data is invalid! Re-enter...");
             }
-        }while(isLoop && isInvalid);
+        } while (isLoop && isInvalid);
         return result;
     }
 
@@ -99,7 +99,7 @@ public class Inputter {
         t.setTourist(getInt("Enter number of tourist: "));
         return t;
     }
-    
+
     //update tour
     public Tour updateTour(){
         Tour t = new Tour();
@@ -111,7 +111,7 @@ public class Inputter {
         t.setTourist(getIntOptional("Enter number of tourist: "));
         return t;
     }
-    
+
     //add booking
     public Booking inputBooking(){
         Booking b = new Booking();
@@ -120,10 +120,9 @@ public class Inputter {
         b.setTourId(inputAndLoop("Enter tour ID: ", ValidationUtils.TourID_VALID, true));
         b.setBookingDate(getDate("Enter booking date (dd/MM/yyyy): "));
         b.setPhone(inputAndLoop("Enter phone number: ", ValidationUtils.Phone_VALID, true));
-        b.setNumberOfPeople(getInt("Enter number of people: "));
         return b;
     }
-    
+
     //update booking
     public Booking updateBooking(){
         Booking b = new Booking();
@@ -131,13 +130,12 @@ public class Inputter {
         b.setTourId(inputAndLoop("Enter tour ID: ", ValidationUtils.TourID_VALID, false));
         b.setBookingDate(getDateOptional("Enter booking date (dd/MM/yyyy): "));
         b.setPhone(inputAndLoop("Enter phone number: ", ValidationUtils.Phone_VALID, false));
-        b.setNumberOfPeople(getIntOptional("Enter number of people: "));
         return b;
     }
-    
+
     //định dạng ngày, tháng, năm
     public Date getDate(String mess){
-        String  dateStr = getString(mess);
+        String dateStr = getString(mess);
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             sdf.setLenient(false);

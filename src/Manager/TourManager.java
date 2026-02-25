@@ -21,21 +21,6 @@ public class TourManager {
         this.saved = true;
         this.pathFile = "./Tours.txt";
         readFromFile();
-
-        //test
-        Tour t = new Tour();
-        t.setTourId("T00011");
-        t.setTourName("Ha Long Bay Tour");
-        t.setPrice(100.0);
-        t.setHomeId("hs0001");
-        t.setDepartureDate(new Date());
-        t.setEndDate(new Date());
-        t.setTourist(2);
-        t.setBooking(false);
-        tourList.add(t);
-        saved = false;
-        System.out.println("Tour added: " + t.getTourId());
-        System.out.println("Tour: " + t.toString());
     }
 
     public Tour findById(String TourId) {
@@ -113,8 +98,8 @@ public class TourManager {
             }
         }
 
-        // Validate tourist only if being updated (greater than 0)
-        if (updatedTour.getTourist() > 0) {
+        // Validate tourist only if being updated (not sentinel value)
+        if (updatedTour.getTourist() != Integer.MIN_VALUE) {
             Homestay homestay = hm.findById(existing.getHomeId());
             if (updatedTour.getTourist() > homestay.getMaximumcapacity()) {
                 System.out.println("Number of tourists exceeds maximum capacity of homestay");
@@ -127,7 +112,7 @@ public class TourManager {
             existing.setTourName(updatedTour.getTourName());
         }
 
-        if (updatedTour.getPrice() != 0) {
+        if (updatedTour.getPrice() != Double.NEGATIVE_INFINITY) {
             existing.setPrice(updatedTour.getPrice());
         }
 
@@ -143,7 +128,7 @@ public class TourManager {
             existing.setEndDate(updatedTour.getEndDate());
         }
 
-        if (updatedTour.getTourist() > 0) {
+        if (updatedTour.getTourist() != Integer.MIN_VALUE) {
             existing.setTourist(updatedTour.getTourist());
         }
 
@@ -200,16 +185,16 @@ public class TourManager {
 
         for (Tour tour : tourList) {
             if (tour.getDepartureDate().after(currentDate)) {
-                // Calculate total booking amount for this tour
-                double totalAmount = 0;
+                // Count bookings for this tour
                 int bookingCount = 0;
-
                 for (model.Booking booking : bm.getBookingList()) {
                     if (booking.getTourId().equalsIgnoreCase(tour.getTourId())) {
                         bookingCount++;
-                        totalAmount += booking.getTotalAmount();
                     }
                 }
+
+                // Calculate total amount using tour's tourist count and price
+                double totalAmount = tour.getTourist() * tour.getPrice();
 
                 grandTotal += totalAmount;
 
@@ -243,15 +228,11 @@ public class TourManager {
     public final void readFromFile() {
         tourList.clear();
         List<String> lines = FileUtils.readLines(pathFile);
-        System.out.println("Lines read: " + lines.size());
 
         for (String line : lines) {
             Tour t = textToObject(line);
             if (t != null) {
                 tourList.add(t);
-                System.out.println("Loaded tour: " + t.getTourId() + " - " + t.getTourName());
-            } else {
-                System.out.println("Failed to parse line: " + line);
             }
         }
         System.out.println("Total tours loaded: " + tourList.size());
@@ -293,6 +274,10 @@ public class TourManager {
             System.out.println("Error parsing tour line: " + e.getMessage());
             return null;
         }
+    }
+
+    public List<Tour> getTourList() {
+        return tourList;
     }
 
 }

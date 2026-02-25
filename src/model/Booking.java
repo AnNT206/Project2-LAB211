@@ -9,7 +9,6 @@ public class Booking {
     private String tourId;
     private Date bookingDate;
     private String phone;
-    private int numberOfPeople;
     private double totalAmount;
 
     //constructor
@@ -65,14 +64,6 @@ public class Booking {
         this.phone = phone;
     }
 
-    public int getNumberOfPeople() {
-        return numberOfPeople;
-    }
-
-    public void setNumberOfPeople(int numberOfPeople) {
-        this.numberOfPeople = numberOfPeople;
-    }
-
     public double getTotalAmount() {
         return totalAmount;
     }
@@ -85,8 +76,8 @@ public class Booking {
     public String toString() {
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy");
         String bookingDateStr = bookingDate != null ? sdf.format(bookingDate) : "N/A";
-        return String.format("%-12s | %-20s | %-10s | %-12s | %-12s | %-14d | %-12.2f",
-                bookingId, fullName, tourId, bookingDateStr, phone, numberOfPeople, totalAmount);
+        return String.format("%-12s | %-20s | %-10s | %-12s | %-12s | %-12.2f",
+                bookingId, fullName, tourId, bookingDateStr, phone, totalAmount);
     }
 
 }

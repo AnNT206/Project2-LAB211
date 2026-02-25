@@ -60,10 +60,10 @@ public class Main {
                     break;
                 case 8:
                     String fullName = input.getString("Enter full name to search: ");
-                    bm.listByFullName(fullName);
+                    bm.listByFullName(fullName, tm);
                     break;
                 case 9:
-                    bm.statisticsTotalTourists();
+                    bm.statisticsTotalTourists(tm);
                     break;
                 case 10:
                     System.out.println("END...");
