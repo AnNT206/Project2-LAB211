@@ -116,7 +116,7 @@ public class Inputter {
     public Booking inputBooking(){
         Booking b = new Booking();
         b.setBookingId(inputAndLoop("Enter booking ID: ", ValidationUtils.BookID_VALID, true));
-        b.setFullName(inputAndLoop("Enter full name: ", ValidationUtils.FullName_VALID, true));
+        b.setFullName(inputAndLoop("Enter your full name: ", ValidationUtils.FullName_VALID, true));
         b.setTourId(inputAndLoop("Enter tour ID: ", ValidationUtils.TourID_VALID, true));
         b.setBookingDate(getDate("Enter booking date (dd/MM/yyyy): "));
         b.setPhone(inputAndLoop("Enter phone number: ", ValidationUtils.Phone_VALID, true));

@@ -51,12 +51,12 @@ public class Main {
                     break;
                 case 6:
                     String removeBooking = input.getString("Enter booking ID to remove: ");
-                    bm.remove(removeBooking);
+                    bm.removeBooking(removeBooking);
                     break;
                 case 7:
-                    String bookingID = input.getString("Enter booking ID to update: ");
+                    String bookingId = input.getString("Enter Booking ID to update: ");
                     Booking updatedBooking = input.updateBooking();
-                    bm.update(bookingID, updatedBooking, hm, tm);
+                    bm.updateBooking(bookingId, hm, tm, updatedBooking);
                     break;
                 case 8:
                     String fullName = input.getString("Enter full name to search: ");
