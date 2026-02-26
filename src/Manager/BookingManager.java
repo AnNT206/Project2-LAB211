@@ -77,24 +77,24 @@ public class BookingManager {
     }
 
     //addNew
-    public boolean addNewBooking(HomestayManager hm, TourManager tm, Booking newBooking){
-        if(findById(newBooking.getBookingId()) != null){
+    public boolean addNewBooking(HomestayManager hm, TourManager tm, Booking newBooking) {
+        if (findById(newBooking.getBookingId()) != null) {
             System.out.println("Booking ID already exists!");
             return false;
         }
-        
+
         Tour tour = tm.findById(newBooking.getTourId());
-        if(tour == null){
+        if (tour == null) {
             System.out.println("Tour does not exist");
             return false;
         }
-        
+
         Homestay homestay = hm.findById(tour.getHomeId());
-        if(homestay == null){
+        if (homestay == null) {
             System.out.println("Homestay does not exist");
             return false;
         }
-        
+
         bookingList.add(newBooking);
         tour.setBooking(true);
         saved = false;
@@ -103,26 +103,24 @@ public class BookingManager {
     }
 
     //update
-    public boolean updateBooking(String bookingId, HomestayManager hm, TourManager tm, Booking updateBooking){
+    public boolean updateBooking(String bookingId, HomestayManager hm, TourManager tm, Booking updateBooking) {
         Booking existing = findById(bookingId);
-        if(existing == null){
+        if (existing == null) {
             System.out.println("Booking ID does not exist");
             return false;
         }
-        
+
         Tour tour = null;
         String tourIdToUse = existing.getTourId();
-        
-        if(updateBooking.getTourId() != null && !updateBooking.getTourId().trim().isEmpty()){
-            tourIdToUse = updateBooking.getBookingId();
+
+        if (updateBooking.getTourId() != null && !updateBooking.getTourId().trim().isEmpty()) {
+            tourIdToUse = updateBooking.getTourId();
             tour = tm.findById(tourIdToUse);
-            if(tour == null){
+            if (tour == null) {
                 System.out.println("Tour ID does not exist");
-                return false;
             }
-            else{
-                tour = tm.findById(existing.getTourId());
-            }
+        } else {
+            tour = tm.findById(existing.getTourId());
         }
         
         if(tour != null && hm.findById(tour.getHomeId()) == null){
@@ -152,7 +150,7 @@ public class BookingManager {
     }
 
     //remove
-    public boolean removeBooking(String bookingId){
+    public boolean removeBooking(String bookingId) {
         if (findById(bookingId) == null) {
             System.out.println("Booking ID does not exist");
             return false;
@@ -169,22 +167,22 @@ public class BookingManager {
     }
 
     //listByFullName
-    public void listByFullName(String fullName, TourManager tm){
+    public void listByFullName(String fullName, TourManager tm) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         System.out.println("Booking List for '" + fullName + "':");
         System.out.println("--------------------------------");
         System.out.printf("%-12s | %-20s | %-10s | %-12s | %-12s | %-12s%n", "Booking ID", "Full Name", "Tour ID", "Booking Date", "Phone", "TotalAmount");
         System.out.println("--------------------------------");
-        
+
         boolean found = false;
         for (Booking booking : bookingList) {
-            if(booking.getFullName().toLowerCase().contains(fullName.toLowerCase())){
+            if (booking.getFullName().toLowerCase().contains(fullName.toLowerCase())) {
                 Tour tour = tm.findById(booking.getTourId());
                 double totalAmount = 0.0;
-                if(tour != null){
+                if (tour != null) {
                     totalAmount = tour.getTourist() * tour.getPrice();
                 }
-                
+
                 String bookingDateStr = booking.getBookingDate() != null ? sdf.format(booking.getBookingDate()) : "N/A";
                 System.out.printf("%-12s | %-20s | %-10s | %-12s | %-12s | %-12.2f%n",
                         booking.getBookingId(),
@@ -196,7 +194,7 @@ public class BookingManager {
                 found = true;
             }
         }
-        
+
         if (!found) {
             System.out.println("No bookings found with name containing: " + fullName);
         }
@@ -206,14 +204,14 @@ public class BookingManager {
     //statistics total number of tourists
     public void statisticsTotalTourists(TourManager tm) {
         int totalTourists = 0;
-        
+
         for (Booking booking : bookingList) {
             Tour tour = tm.findById(booking.getTourId());
             if (tour != null) {
                 totalTourists += tour.getTourist();
             }
         }
-        
+
         System.out.println("======= TOURIST STATISTICS =======");
         System.out.println("Total number of bookings: " + bookingList.size());
         System.out.println("Total number of tourists: " + totalTourists);

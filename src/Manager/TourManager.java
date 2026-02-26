@@ -37,28 +37,27 @@ public class TourManager {
             System.out.println("Tour ID already exists");
             return false;
         }
-
+        
         Homestay home = hm.findById(t.getHomeId());
         if (home == null) {
             System.out.println("Home ID does not exist");
             return false;
         }
-
+        
         if (!t.getEndDate().after(t.getDepartureDate())) {
             System.out.println("End date must be after departure date");
             return false;
         }
-
+        
         if (t.getTourist() <= 0) {
             System.out.println("Number of tourist must be greater than 0");
             return false;
         }
-
+        
         if (t.getTourist() > home.getMaximumcapacity()) {
             System.out.println("Number of tourist exceeds maximum capacity of homestay");
         }
-
-        t.setBooking(true);
+        
         tourList.add(t);
         saved = false;
         System.out.println("Add new tour successfully");
@@ -133,14 +132,13 @@ public class TourManager {
         java.util.Date currentDate = new java.util.Date();
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         sdf.setLenient(false);
-
+        
         System.out.println("======= TOURS WITH PAST DEPARTURE DATES =======");
         System.out.println("Current date: " + sdf.format(currentDate));
-        System.out.println("-------------------------------------------------");
         System.out.printf("%-10s | %-25s | %-12s | %-12s | %-10s | %-8s\n",
                 "Tour ID", "Tour Name", "Departure", "End Date", "Tourists", "Booking");
         System.out.println("-------------------------------------------------");
-
+        
         int count = 0;
         for (Tour tour : tourList) {
             if (tour.getDepartureDate().before(currentDate)) {
@@ -152,42 +150,42 @@ public class TourManager {
         }
         System.out.println("-------------------------------------------------");
         System.out.println("Total tours with past departure dates: " + count);
-    }
+    }    
 
 //List total booking amount for tours with departure dates later than current date
     public void listTotalBookingAmount(BookingManager bm) {
         java.util.Date currentDate = new java.util.Date();
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         sdf.setLenient(false);
-
+        
         java.util.List<Object[]> tourData = new java.util.ArrayList<>();
         double grandTotal = 0;
-
+        
         for (Tour tour : tourList) {
             if (tour.getDepartureDate().after(currentDate)) {
                 int bookingCount = 0;
-
+                
                 for (Booking booking : bm.getBookingList()) {
                     if (booking.getTourId().equalsIgnoreCase(tour.getTourId())) {
                         bookingCount++;
                     }
                 }
-
+                
                 double totalAmount = tour.getPrice() * tour.getTourist();
                 grandTotal += totalAmount;
-
+                
                 tourData.add(new Object[]{tour.getTourId(), tour.getTourName(), bookingCount, totalAmount});
             }
         }
-
+        
         tourData.sort((a, b) -> Double.compare((Double) b[3], (Double) a[3]));
-
+        
         System.out.println("======= TOURS WITH FUTURE DEPARTURE DATES =======");
         System.out.println("Current Date: " + sdf.format(currentDate));
         System.out.println("-------------------------------------------------");
         System.out.printf("%-10s | %-25s | %-10s | %-15s%n", "Tour ID", "Tour Name", "Bookings", "Total Amount");
         System.out.println("-------------------------------------------------");
-
+        
         for (Object[] data : tourData) {
             System.out.printf("%-10s | %-25s | %-10d | $%-15.2f%n",
                     data[0],
@@ -195,7 +193,6 @@ public class TourManager {
                     data[2],
                     data[3]);
         }
-
         System.out.println("-------------------------------------------------");
         System.out.printf("Grand Total: $%.2f%n", grandTotal);
     }
