@@ -63,7 +63,7 @@ public class Main {
                     bm.listByFullName(fullName, tm);
                     break;
                 case 9:
-                    bm.statisticsTotalTourists(tm);
+                    bm.statisticsTotalTourists(tm, hm);
                     break;
                 case 10:
                     System.out.println("END...");

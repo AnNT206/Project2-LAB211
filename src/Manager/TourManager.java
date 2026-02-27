@@ -1,6 +1,8 @@
 package Manager;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import model.Booking;
@@ -49,6 +51,13 @@ public class TourManager {
             return false;
         }
         
+        LocalDate currentDate = LocalDate.now();
+        LocalDate departureDate = t.getDepartureDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        if(!departureDate.isAfter(currentDate)){
+            System.out.println("Departure date must be after current date");
+            return false;
+        }
+        
         if (t.getTourist() <= 0) {
             System.out.println("Number of tourist must be greater than 0");
             return false;
@@ -84,6 +93,13 @@ public class TourManager {
                 System.out.println("End date must be after departure date");
                 return false;
             }
+        }
+        
+        LocalDate currentDate = LocalDate.now();
+        LocalDate departureDate = updatedTour.getDepartureDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        if(!departureDate.isAfter(currentDate)){
+            System.out.println("Departure date must be before current date");
+            return false;
         }
 
         if (updatedTour.getTourist() != Integer.MIN_VALUE) {
@@ -129,63 +145,72 @@ public class TourManager {
 
     //List tours with departure dates earlier than current date
     public void listPastTours() {
-        java.util.Date currentDate = new java.util.Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        sdf.setLenient(false);
-        
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
         System.out.println("======= TOURS WITH PAST DEPARTURE DATES =======");
-        System.out.println("Current date: " + sdf.format(currentDate));
+        System.out.println("Current date: " + currentDate.format(dtf));
         System.out.printf("%-10s | %-25s | %-12s | %-12s | %-10s | %-8s\n",
                 "Tour ID", "Tour Name", "Departure", "End Date", "Tourists", "Booking");
         System.out.println("-------------------------------------------------");
-        
+
         int count = 0;
         for (Tour tour : tourList) {
-            if (tour.getDepartureDate().before(currentDate)) {
+            // Convert java.util.Date to LocalDate
+            LocalDate departureDate = tour.getDepartureDate().toInstant()
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toLocalDate();
+
+            if (departureDate.isBefore(currentDate)) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
                 System.out.printf("%-10s | %-25s | %-12s | %-12s | %-10s | %8s%n",
                         tour.getTourId(), tour.getTourName(), sdf.format(tour.getDepartureDate()),
                         sdf.format(tour.getEndDate()), tour.getTourist(), tour.isBooking() ? "TRUE" : "FALSE");
+                count++;
             }
-            count++;
         }
         System.out.println("-------------------------------------------------");
         System.out.println("Total tours with past departure dates: " + count);
-    }    
+    }
 
 //List total booking amount for tours with departure dates later than current date
     public void listTotalBookingAmount(BookingManager bm) {
-        java.util.Date currentDate = new java.util.Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        sdf.setLenient(false);
-        
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
         java.util.List<Object[]> tourData = new java.util.ArrayList<>();
         double grandTotal = 0;
-        
+
         for (Tour tour : tourList) {
-            if (tour.getDepartureDate().after(currentDate)) {
+            // Convert java.util.Date to LocalDate for comparison
+            LocalDate departureDate = tour.getDepartureDate().toInstant()
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toLocalDate();
+
+            if (departureDate.isAfter(currentDate)) {
                 int bookingCount = 0;
-                
+
                 for (Booking booking : bm.getBookingList()) {
                     if (booking.getTourId().equalsIgnoreCase(tour.getTourId())) {
                         bookingCount++;
                     }
                 }
-                
+
                 double totalAmount = tour.getPrice() * tour.getTourist();
                 grandTotal += totalAmount;
-                
+
                 tourData.add(new Object[]{tour.getTourId(), tour.getTourName(), bookingCount, totalAmount});
             }
         }
-        
+
         tourData.sort((a, b) -> Double.compare((Double) b[3], (Double) a[3]));
-        
+
         System.out.println("======= TOURS WITH FUTURE DEPARTURE DATES =======");
-        System.out.println("Current Date: " + sdf.format(currentDate));
+        System.out.println("Current Date: " + currentDate.format(dtf));
         System.out.println("-------------------------------------------------");
         System.out.printf("%-10s | %-25s | %-10s | %-15s%n", "Tour ID", "Tour Name", "Bookings", "Total Amount");
         System.out.println("-------------------------------------------------");
-        
+
         for (Object[] data : tourData) {
             System.out.printf("%-10s | %-25s | %-10d | $%-15.2f%n",
                     data[0],

@@ -1,6 +1,7 @@
 package Manager;
 
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import model.Booking;
@@ -89,6 +90,11 @@ public class BookingManager {
             return false;
         }
 
+        if (newBooking.getBookingDate() != null && !newBooking.getBookingDate().before(tour.getDepartureDate())) {
+            System.out.println("Booking date must be before departure date");
+            return false;
+        }
+
         Homestay homestay = hm.findById(tour.getHomeId());
         if (homestay == null) {
             System.out.println("Homestay does not exist");
@@ -127,21 +133,28 @@ public class BookingManager {
             System.out.println("Home ID does not exist");
             return false;
         }
-        
+
+        if (updateBooking.getBookingDate() != null) {
+            if (!updateBooking.getBookingDate().before(tour.getDepartureDate())) {
+                System.out.println("The booking date must be after the departure date.");
+                return false;
+            }
+        }
+
         if (updateBooking.getFullName() != null && !updateBooking.getFullName().trim().isEmpty()) {
             existing.setFullName(updateBooking.getFullName());
         }
-        
+
         if (updateBooking.getTourId() != null && !updateBooking.getTourId().trim().isEmpty()) {
             existing.setTourId(updateBooking.getTourId());
         }
         
-        if (updateBooking.getBookingDate() != null) {
-            existing.setBookingDate(updateBooking.getBookingDate());
-        }
-        
         if (updateBooking.getPhone() != null && !updateBooking.getPhone().trim().isEmpty()) {
             existing.setPhone(updateBooking.getPhone());
+        }
+        
+        if(updateBooking.getBookingDate() != null){
+            existing.setBookingDate(updateBooking.getBookingDate());
         }
         
         saved = false;
@@ -168,7 +181,7 @@ public class BookingManager {
 
     //listByFullName
     public void listByFullName(String fullName, TourManager tm) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         System.out.println("Booking List for '" + fullName + "':");
         System.out.println("--------------------------------");
         System.out.printf("%-12s | %-20s | %-10s | %-12s | %-12s | %-12s%n", "Booking ID", "Full Name", "Tour ID", "Booking Date", "Phone", "TotalAmount");
@@ -183,7 +196,12 @@ public class BookingManager {
                     totalAmount = tour.getTourist() * tour.getPrice();
                 }
 
-                String bookingDateStr = booking.getBookingDate() != null ? sdf.format(booking.getBookingDate()) : "N/A";
+                String bookingDateStr = booking.getBookingDate() != null
+                    ? booking.getBookingDate().toInstant()
+                            .atZone(java.time.ZoneId.systemDefault())
+                            .toLocalDate()
+                            .format(dtf)
+                    : "N/A";
                 System.out.printf("%-12s | %-20s | %-10s | %-12s | %-12s | %-12.2f%n",
                         booking.getBookingId(),
                         booking.getFullName(),
@@ -202,7 +220,7 @@ public class BookingManager {
     }
 
     //statistics total number of tourists
-    public void statisticsTotalTourists(TourManager tm) {
+    public void statisticsTotalTourists(TourManager tm, HomestayManager hm) {
         int totalTourists = 0;
 
         for (Booking booking : bookingList) {
@@ -212,9 +230,20 @@ public class BookingManager {
             }
         }
 
-        System.out.println("======= TOURIST STATISTICS =======");
+        System.out.println("======= TOURIST STATISTICS PER HOMESTAY =======");
         System.out.println("Total number of bookings: " + bookingList.size());
         System.out.println("Total number of tourists: " + totalTourists);
-        System.out.println("==================================");
+        System.out.println("------------------------------------------------");
+
+        for (Booking booking : bookingList) {
+            Tour tour = tm.findById(booking.getTourId());
+            if (tour != null) {
+                Homestay homestay = hm.findById(tour.getHomeId());
+                if (homestay != null) {
+                    System.out.println("Homestay: " + homestay.getHomeName() + " - Tourists: " + tour.getTourist());
+                }
+            }
+        }
+        System.out.println("================================================");
     }
 }
