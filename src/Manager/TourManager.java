@@ -94,12 +94,13 @@ public class TourManager {
                 return false;
             }
         }
-        
-        LocalDate currentDate = LocalDate.now();
-        LocalDate departureDate = updatedTour.getDepartureDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-        if(!departureDate.isAfter(currentDate)){
-            System.out.println("Departure date must be before current date");
-            return false;
+        if(updatedTour.getDepartureDate() != null){
+            LocalDate currentDate = LocalDate.now();
+            LocalDate departureDate = updatedTour.getDepartureDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+            if(!departureDate.isAfter(currentDate)){
+                System.out.println("Departure date must be after current date");
+                return false;
+            }
         }
 
         if (updatedTour.getTourist() != Integer.MIN_VALUE) {
@@ -173,46 +174,37 @@ public class TourManager {
     public void listTotalBookingAmount(BookingManager bm) {
         LocalDate currentDate = LocalDate.now();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
+        
         java.util.List<Object[]> tourData = new java.util.ArrayList<>();
         double grandTotal = 0;
-
+        
         for (Tour tour : tourList) {
-            // Convert java.util.Date to LocalDate for comparison
-            LocalDate departureDate = tour.getDepartureDate().toInstant()
-                    .atZone(java.time.ZoneId.systemDefault())
-                    .toLocalDate();
-
+            LocalDate departureDate = tour.getDepartureDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
             if (departureDate.isAfter(currentDate)) {
                 int bookingCount = 0;
-
+                
                 for (Booking booking : bm.getBookingList()) {
                     if (booking.getTourId().equalsIgnoreCase(tour.getTourId())) {
                         bookingCount++;
                     }
                 }
-
+                
                 double totalAmount = tour.getPrice() * tour.getTourist();
                 grandTotal += totalAmount;
-
+                
                 tourData.add(new Object[]{tour.getTourId(), tour.getTourName(), bookingCount, totalAmount});
             }
         }
-
+        
         tourData.sort((a, b) -> Double.compare((Double) b[3], (Double) a[3]));
-
+        
         System.out.println("======= TOURS WITH FUTURE DEPARTURE DATES =======");
-        System.out.println("Current Date: " + currentDate.format(dtf));
-        System.out.println("-------------------------------------------------");
+        System.out.println("Current date: " + currentDate.format(dtf));
         System.out.printf("%-10s | %-25s | %-10s | %-15s%n", "Tour ID", "Tour Name", "Bookings", "Total Amount");
         System.out.println("-------------------------------------------------");
-
+        
         for (Object[] data : tourData) {
-            System.out.printf("%-10s | %-25s | %-10d | $%-15.2f%n",
-                    data[0],
-                    data[1],
-                    data[2],
-                    data[3]);
+            System.out.printf("%-10s | %-25s | %-10s | %-15.2f%n", data[0], data[1], data[2], data[3]);
         }
         System.out.println("-------------------------------------------------");
         System.out.printf("Grand Total: $%.2f%n", grandTotal);
