@@ -136,7 +136,7 @@ public class BookingManager {
 
         if (updateBooking.getBookingDate() != null) {
             if (!updateBooking.getBookingDate().before(tour.getDepartureDate())) {
-                System.out.println("The booking date must be after the departure date.");
+                System.out.println("The booking date must be before the departure date.");
                 return false;
             }
         }
