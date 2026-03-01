@@ -156,16 +156,12 @@ public class TourManager {
 
         int count = 0;
         for (Tour tour : tourList) {
-            // Convert java.util.Date to LocalDate
-            LocalDate departureDate = tour.getDepartureDate().toInstant()
-                    .atZone(java.time.ZoneId.systemDefault())
-                    .toLocalDate();
-
+            LocalDate departureDate = tour.getDepartureDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
             if (departureDate.isBefore(currentDate)) {
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                System.out.printf("%-10s | %-25s | %-12s | %-12s | %-10s | %8s%n",
-                        tour.getTourId(), tour.getTourName(), sdf.format(tour.getDepartureDate()),
-                        sdf.format(tour.getEndDate()), tour.getTourist(), tour.isBooking() ? "TRUE" : "FALSE");
+                LocalDate endDate = tour.getEndDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+                System.out.printf("%-10s | %-25s | %-12s | %-12s | %-10s | %8s%n", 
+                        tour.getTourId(), tour.getTourName(), departureDate.format(dtf), 
+                        endDate.format(dtf), tour.getTourist(), tour.isBooking());
                 count++;
             }
         }
