@@ -242,8 +242,8 @@ public class BookingManager {
                                 .toLocalDate()
                                 .format(dtf)
                         : "N/A";
-                System.out.printf("%-12s | %-20s | %-10s | %-12s | %-12s | %-12.2f%n",
-                        booking.getBookingId(),
+                System.out.printf("%-12s | %-20s | %-10s | %-12s | %-12s | %-12.2f%n", 
+                        booking.getBookingId(), 
                         booking.getFullName(),
                         booking.getTourId(),
                         bookingDateStr,
@@ -252,7 +252,7 @@ public class BookingManager {
                 found = true;
             }
         }
-
+        
         if (!found) {
             System.out.println("No bookings found with name containing: " + fullName);
         }
@@ -262,24 +262,24 @@ public class BookingManager {
     //statistics total number of tourists
     public void statisticsTotalTourists(TourManager tm, HomestayManager hm) {
         int totalTourists = 0;
-
+        
         for (Booking booking : bookingList) {
             Tour tour = tm.findById(booking.getTourId());
             if (tour != null) {
                 totalTourists += tour.getTourist();
             }
         }
-
+        
         System.out.println("====== TOTAL TOURISTS PER HOMESTAY =======");
         System.out.println("Total number of bookings: " + bookingList.size());
         System.out.println("Total number of tourists: " + totalTourists);
-
+        
         for (Booking booking : bookingList) {
             Tour tour = tm.findById(booking.getTourId());
             if (tour != null) {
                 Homestay homestay = hm.findById(tour.getHomeId());
                 if (homestay != null) {
-                    System.out.println("Homestay: " + homestay.getHomeName() + " - Tourists: " + tour.getTourId());
+                    System.out.println("Homestay: " +homestay.getHomeName() + " - Tourists: " + tour.getTourist());
                 }
             }
         }
