@@ -170,6 +170,7 @@ public class BookingManager {
         if (updateBooking.getBookingDate() != null) {
             if (!updateBooking.getBookingDate().before(tour.getDepartureDate())) {
                 System.out.println("The booking date must be before the departure date.");
+<<<<<<< HEAD
                 return false;
             }
 
@@ -177,6 +178,8 @@ public class BookingManager {
             LocalDate bookingDate = updateBooking.getBookingDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
             if (!bookingDate.isAfter(currentDate)) {
                 System.out.println("Booking date must be after current date");
+=======
+>>>>>>> 3dbec7677a371633d5a2f72bb8eb7c8eb4ab639f
                 return false;
             }
         }
