@@ -29,8 +29,8 @@ public final class FileUtils {
         }
 
         try (FileInputStream fis = new FileInputStream(f);
-             InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_16);
-             BufferedReader br = new BufferedReader(isr)) {
+            InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_16);
+            BufferedReader br = new BufferedReader(isr)) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (!line.trim().isEmpty()) {

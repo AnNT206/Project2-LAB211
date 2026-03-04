@@ -1,6 +1,7 @@
 package Manager;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,16 +26,29 @@ public class BookingManager {
 
     //readFromFile
     public final void readFromFile() {
+        // 1. Xóa dữ liệu cũ trong bộ nhớ
         bookingList.clear();
-        List<String> lines = FileUtils.readLines(pathFile);
 
+        // 2. Gọi lớp FileUtils để lấy danh sách các dòng văn bản
+        List<String> lines = FileUtils.readLines("Bookings.txt"); // Hoặc dùng biến pathFile của bạn
+
+        if (lines.isEmpty()) {
+            System.out.println("Warning: Bookings.txt is empty or missing. Starting with an empty system.");
+            return;
+        }
+
+        int successCount = 0;
+
+        // 3. Duyệt và chuyển đổi
         for (String line : lines) {
             Booking b = textToObject(line);
             if (b != null) {
                 bookingList.add(b);
+                successCount++;
             }
         }
-        System.out.println("Total bookings loaded: " + bookingList.size());
+
+        System.out.println("Total bookings loaded: " + successCount);
     }
 
     //findById
@@ -49,30 +63,44 @@ public class BookingManager {
 
     //textToObject
     public Booking textToObject(String temp) {
+        // Double check: FileUtils đã loại bỏ dòng trống, nhưng check lại cho an toàn
+        if (temp == null || temp.trim().isEmpty()) {
+            return null;
+        }
+
         try {
+            // Tách dữ liệu bằng dấu phẩy
             String[] part = temp.split(",");
-            if (part.length < 5) {
-                System.out.println("Error: Expected at least 5 parts, got " + part.length + " for line: " + temp);
+
+            // Xác thực số lượng cột (Phải đủ 6 cột)
+            if (part.length < 6) {
+                System.out.println(">>> Error: Invalid format (missing fields) in line: " + temp);
                 return null;
             }
+
+            // Trimming dọn dẹp khoảng trắng 2 đầu do người dùng nhập dư trong file
             for (int i = 0; i < part.length; i++) {
                 part[i] = part[i].trim();
             }
+
             Booking b = new Booking();
             b.setBookingId(part[0]);
             b.setFullName(part[1]);
             b.setTourId(part[2]);
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-            b.setBookingDate(sdf.parse(part[3]));
-            b.setPhone(part[4]);
 
-            // Handle optional field (totalAmount)
-            if (part.length >= 6) {
-                b.setTotalAmount(Double.parseDouble(part[5]));
-            }
+            // Xử lý ngày tháng nghiêm ngặt
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            sdf.setLenient(false);
+            b.setBookingDate(sdf.parse(part[3]));
+
+            b.setPhone(part[4]);
+            b.setTotalAmount(Double.parseDouble(part[5]));
+
             return b;
+
         } catch (Exception e) {
-            System.out.println("Error parsing line: " + e.getMessage());
+            // Bắt chung mọi lỗi: Lỗi ngày tháng (ParseException) hoặc lỗi chữ lẫn vào số (NumberFormatException)
+            System.out.println(">>> Error parsing data in line [" + temp + "]: " + e.getMessage());
             return null;
         }
     }
@@ -90,8 +118,15 @@ public class BookingManager {
             return false;
         }
 
-        if (newBooking.getBookingDate() != null && !newBooking.getBookingDate().before(tour.getDepartureDate())) {
+        if (!newBooking.getBookingDate().before(tour.getDepartureDate())) {
             System.out.println("Booking date must be before departure date");
+            return false;
+        }
+
+        LocalDate currentDate = LocalDate.now();
+        LocalDate bookingDate = newBooking.getBookingDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        if (!bookingDate.isAfter(currentDate)) {
+            System.out.println("Booking date must be after current date");
             return false;
         }
 
@@ -117,26 +152,31 @@ public class BookingManager {
         }
 
         Tour tour = null;
-        String tourIdToUse = existing.getTourId();
-
         if (updateBooking.getTourId() != null && !updateBooking.getTourId().trim().isEmpty()) {
-            tourIdToUse = updateBooking.getTourId();
-            tour = tm.findById(tourIdToUse);
+            tour = tm.findById(updateBooking.getTourId());
             if (tour == null) {
                 System.out.println("Tour ID does not exist");
+                return false;
             }
         } else {
             tour = tm.findById(existing.getTourId());
         }
-        
-        if(tour != null && hm.findById(tour.getHomeId()) == null){
+
+        if (tour != null && hm.findById(tour.getHomeId()) == null) {
             System.out.println("Home ID does not exist");
             return false;
         }
 
         if (updateBooking.getBookingDate() != null) {
             if (!updateBooking.getBookingDate().before(tour.getDepartureDate())) {
-                System.out.println("The booking date must be after the departure date.");
+                System.out.println("The booking date must be before the departure date.");
+                return false;
+            }
+
+            LocalDate currentDate = LocalDate.now();
+            LocalDate bookingDate = updateBooking.getBookingDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+            if (!bookingDate.isAfter(currentDate)) {
+                System.out.println("Booking date must be after current date");
                 return false;
             }
         }
@@ -148,15 +188,15 @@ public class BookingManager {
         if (updateBooking.getTourId() != null && !updateBooking.getTourId().trim().isEmpty()) {
             existing.setTourId(updateBooking.getTourId());
         }
-        
+
         if (updateBooking.getPhone() != null && !updateBooking.getPhone().trim().isEmpty()) {
             existing.setPhone(updateBooking.getPhone());
         }
-        
-        if(updateBooking.getBookingDate() != null){
+
+        if (updateBooking.getBookingDate() != null) {
             existing.setBookingDate(updateBooking.getBookingDate());
         }
-        
+
         saved = false;
         System.out.println("Update booking successfully");
         return true;
@@ -197,11 +237,11 @@ public class BookingManager {
                 }
 
                 String bookingDateStr = booking.getBookingDate() != null
-                    ? booking.getBookingDate().toInstant()
-                            .atZone(java.time.ZoneId.systemDefault())
-                            .toLocalDate()
-                            .format(dtf)
-                    : "N/A";
+                        ? booking.getBookingDate().toInstant()
+                                .atZone(java.time.ZoneId.systemDefault())
+                                .toLocalDate()
+                                .format(dtf)
+                        : "N/A";
                 System.out.printf("%-12s | %-20s | %-10s | %-12s | %-12s | %-12.2f%n",
                         booking.getBookingId(),
                         booking.getFullName(),
@@ -230,17 +270,16 @@ public class BookingManager {
             }
         }
 
-        System.out.println("======= TOURIST STATISTICS PER HOMESTAY =======");
+        System.out.println("====== TOTAL TOURISTS PER HOMESTAY =======");
         System.out.println("Total number of bookings: " + bookingList.size());
         System.out.println("Total number of tourists: " + totalTourists);
-        System.out.println("------------------------------------------------");
 
         for (Booking booking : bookingList) {
             Tour tour = tm.findById(booking.getTourId());
             if (tour != null) {
                 Homestay homestay = hm.findById(tour.getHomeId());
                 if (homestay != null) {
-                    System.out.println("Homestay: " + homestay.getHomeName() + " - Tourists: " + tour.getTourist());
+                    System.out.println("Homestay: " + homestay.getHomeName() + " - Tourists: " + tour.getTourId());
                 }
             }
         }

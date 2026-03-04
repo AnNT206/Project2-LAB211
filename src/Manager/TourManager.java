@@ -65,12 +65,13 @@ public class TourManager {
         
         if (t.getTourist() > home.getMaximumcapacity()) {
             System.out.println("Number of tourist exceeds maximum capacity of homestay");
+            return false;
         }
         
         tourList.add(t);
         saved = false;
         System.out.println("Add new tour successfully");
-        return true;
+        return true;  
     }
 
     //Update tour
@@ -80,14 +81,15 @@ public class TourManager {
             System.out.println("Tour not found");
             return false;
         }
-
+        
         if (updatedTour.getHomeId() != null && !updatedTour.getHomeId().trim().isEmpty()) {
-            if (hm.findById(updatedTour.getHomeId()) == null) {
+            Homestay homestay = hm.findById(updatedTour.getHomeId());
+            if(homestay == null){
                 System.out.println("Home ID does not exist");
                 return false;
             }
         }
-
+        
         if (updatedTour.getDepartureDate() != null && updatedTour.getEndDate() != null) {
             if (!updatedTour.getEndDate().after(updatedTour.getDepartureDate())) {
                 System.out.println("End date must be after departure date");
@@ -102,7 +104,7 @@ public class TourManager {
                 return false;
             }
         }
-
+        
         if (updatedTour.getTourist() != Integer.MIN_VALUE) {
             if (updatedTour.getTourist() <= 0) {
                 System.out.println("Number of tourist must be greater than 0");
@@ -114,31 +116,31 @@ public class TourManager {
                 return false;
             }
         }
-
+        
         if (updatedTour.getTourName() != null && !updatedTour.getTourName().trim().isEmpty()) {
             existing.setTourName(updatedTour.getTourName());
         }
-
+        
         if (updatedTour.getPrice() != Double.NEGATIVE_INFINITY) {
             existing.setPrice(updatedTour.getPrice());
         }
-
+        
         if (updatedTour.getHomeId() != null && !updatedTour.getHomeId().trim().isEmpty()) {
             existing.setHomeId(updatedTour.getHomeId());
         }
-
+        
         if (updatedTour.getDepartureDate() != null) {
             existing.setDepartureDate(updatedTour.getDepartureDate());
         }
-
+        
         if (updatedTour.getEndDate() != null) {
             existing.setEndDate(updatedTour.getEndDate());
         }
-
+        
         if (updatedTour.getTourist() != Integer.MIN_VALUE) {
             existing.setTourist(updatedTour.getTourist());
         }
-
+        
         saved = false;
         System.out.println("Update tour successfully");
         return true;
@@ -148,27 +150,27 @@ public class TourManager {
     public void listPastTours() {
         LocalDate currentDate = LocalDate.now();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
+        
         System.out.println("======= TOURS WITH PAST DEPARTURE DATES =======");
         System.out.println("Current date: " + currentDate.format(dtf));
         System.out.printf("%-10s | %-25s | %-12s | %-12s | %-10s | %-8s\n",
                 "Tour ID", "Tour Name", "Departure", "End Date", "Tourists", "Booking");
         System.out.println("-------------------------------------------------");
-
+        
         int count = 0;
         for (Tour tour : tourList) {
             LocalDate departureDate = tour.getDepartureDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
             if (departureDate.isBefore(currentDate)) {
                 LocalDate endDate = tour.getEndDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-                System.out.printf("%-10s | %-25s | %-12s | %-12s | %-10s | %8s%n", 
-                        tour.getTourId(), tour.getTourName(), departureDate.format(dtf), 
+                System.out.printf("%-10s | %-25s | %-12s | %-12s | %-10s | %8s%n",
+                        tour.getTourId(), tour.getTourName(), departureDate.format(dtf),
                         endDate.format(dtf), tour.getTourist(), tour.isBooking());
                 count++;
             }
         }
         System.out.println("-------------------------------------------------");
         System.out.println("Total tours with past departure dates: " + count);
-    }
+   }
 
 //List total booking amount for tours with departure dates later than current date
     public void listTotalBookingAmount(BookingManager bm) {
@@ -209,7 +211,6 @@ public class TourManager {
         System.out.println("-------------------------------------------------");
         System.out.printf("Grand Total: $%.2f%n", grandTotal);
     }
-
     public final void readFromFile() {
         tourList.clear();
         List<String> lines = FileUtils.readLines(pathFile);
